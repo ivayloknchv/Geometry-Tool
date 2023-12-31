@@ -10,11 +10,16 @@ void parallelLine(double[], double[],double[]);
 void perpendicularLine(double[], double[], double[]);
 double getAbs(const double);
 void intersectionPoint(double[], double[], double[]);
+void getMidPoint(double[], double, double[]);
+
 void welcomeMessage();
 
 void operationLineInput();
 void operationPointLies();
 void operationParallel();
+void operationPerpendicular();
+void operationIntersectLines();
+void operationTriangle();
 
 void readLineCoeffs(double[]);
 void readLineCoordinates(double[], const int);
@@ -56,6 +61,8 @@ int main()
 		case '1': operationLineInput(); break;
 		case '2': operationPointLies();  break;
 		case '3': operationParallel(); break;
+		case '4': operationPerpendicular(); break;
+		case '5': operationIntersectLines(); break;
 		}
 		std::cout << "----------------------------\n";
 		std::cout << "Enter the number of operation you want to execute >> ";
@@ -180,22 +187,13 @@ void parallelLine(double pointCoordinates[], double lineCoeff[], double parallel
 	parallelCoeff[0] = lineCoeff[0];
 	parallelCoeff[1] = lineCoeff[1];
 	parallelCoeff[2] = -(parallelCoeff[0]*pointCoordinates[0]+parallelCoeff[1]*pointCoordinates[1]);
-	printEquation(parallelCoeff);
 }
 
 void perpendicularLine(double pointCoordinates[], double lineCoeff[], double perpendicularCoeff[])
 {
-	if (pointLies(pointCoordinates, lineCoeff))
-	{
 		perpendicularCoeff[0] = -lineCoeff[1];
 		perpendicularCoeff[1] = lineCoeff[0];
 		perpendicularCoeff[2] = -(perpendicularCoeff[0] * pointCoordinates[0] + perpendicularCoeff[1] * pointCoordinates[1]);
-		printEquation(perpendicularCoeff);
-	}
-	else
-	{
-		std::cout << "The point doesn't lie on the line";
-	}
 }
 
 void intersectionPoint(double firstLine[], double secondLine[], double intersection[])
@@ -211,19 +209,25 @@ void intersectionPoint(double firstLine[], double secondLine[], double intersect
 	{
 		if (getAbs(detA) <= epsilon && getAbs(detB) <= epsilon)
 		{
-			std::cout << "Lines coincide";
+			std::cout << "Lines coincide"<<'\n';
 		}
 		else
 		{
-			std::cout << "Lines are parallel. They don't intersect.";
+			std::cout << "Lines are parallel. They don't intersect."<<'\n';
 		}
 	}
 	else
 	{
 		intersection[0] = detA / det;
 		intersection[1] = detB / det;
-		std::cout << intersection[0] << ' ' << intersection[1];
+		std::cout << intersection[0] << ' ' << intersection[1]<<'\n';
 	}
+}
+
+void getMidPoint(double firstPoint[], double secondPoint[], double midPoint[])
+{
+	midPoint[0] = firstPoint[0] / 2.00 + firstPoint[0] / 2.00;
+	midPoint[1] = firstPoint[1] / 2.00 + firstPoint[1] / 2.00;
 }
 
 void welcomeMessage()
@@ -315,19 +319,71 @@ void operationParallel()
 
 	parallelLine(pointCoordinates, lineCoeff, parallelCoef);
 
-	std::cout << "Your paraellel line is: ";
+	std::cout << "Your new paraellel line is: ";
 	printEquation(parallelCoef);
+}
+
+void operationPerpendicular()
+{
+	double lineCoeff[3]{};
+	double pointCoordinates[2]{};
+	
+	std::cout << "Enter point (x;y) coordinates: \n";
+	std::cout << "x = ";
+	std::cin >> pointCoordinates[0];
+	std::cout << "y = ";
+	std::cin >> pointCoordinates[1];
+	std::cout << '(' << pointCoordinates[0] << ';' << pointCoordinates[1] << ')' << '\n';
+	readLineCoeffs(lineCoeff);
+
+	if (pointLies(pointCoordinates, lineCoeff))
+	{
+		double perpendicularCoef[3]{};
+		perpendicularLine(pointCoordinates, lineCoeff, perpendicularCoef);
+		std::cout << "Your new perpendicular line is: ";
+		printEquation(perpendicularCoef);
+	}
+	
+	else
+	{
+		std::cout << "The line doesn't pass through the point"<<'\n';
+	}
+	
+}
+
+void operationIntersectLines()
+{
+	double firstLineCoeffs[3]{};
+	double secondLineCoeffs[3]{};
+	double intersect[2]{};
+	readLineCoeffs(firstLineCoeffs);
+	readLineCoeffs(secondLineCoeffs);
+	printEquation(firstLineCoeffs);
+	printEquation(secondLineCoeffs);
+	intersectionPoint(firstLineCoeffs, secondLineCoeffs,intersect);
+}
+
+void operationTriangle()
+{
+	double endges[3][2]{};
+	double sideEquationCoeff[3][3]{};
+
+	for (int i = 0; i < 3; i++)
+	{
+		readLineCoordinates(sideEquationCoeff[i], 3);
+	}
+
 }
 
 void readLineCoeffs(double lineCoeff[])
 {
 	std::cout << "Your line has equation ax+by+c=0. Please enter the coefficents a, b, c respectfully>> ";
-	while (true)
+	while (true) //validation
 	{
 		std::cin >> lineCoeff[0] >> lineCoeff[1] >> lineCoeff[2];
 		if (getAbs(lineCoeff[0]) <= epsilon && getAbs(lineCoeff[1]) <= epsilon)
 		{
-			std::cout<<"Coefficents a and be CAN'T be both 0 zeros simultaneously. Try again>> ";
+			std::cout<<"Coefficents a and be CAN'T be both  zeros simultaneously. Try again>> ";
 		}
 		else
 		{
