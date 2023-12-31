@@ -11,7 +11,15 @@ void perpendicularLine(double[], double[], double[]);
 double getAbs(const double);
 void intersectionPoint(double[], double[], double[]);
 void welcomeMessage();
+
 void operationLineInput();
+void operationPointLies();
+void operationParallel();
+
+void readLineCoeffs(double[]);
+void readLineCoordinates(double[], const int);
+bool validateCoordinates(double[][2], int); // checks if all points have unique coordinates
+
 
 //proverka dali koordinatite sa razlichni
 //sukrushtavane na koef
@@ -19,13 +27,14 @@ void operationLineInput();
 //void ili pointer masiv???
 //a=0 i b=0 ednovremenno
 // funkciqta za perpendikulqra i petata
+//razl naredeni dvoyki
 
 int main()
 {
 	welcomeMessage();
 
 	char operation = '0';
-	std::cout << "Enter the number of mathematical operation you want to execute >> ";
+	std::cout << "Enter the number of operation you want to execute >> ";
 	std::cin >> operation;
 	while (operation != '0')
 	{
@@ -45,9 +54,14 @@ int main()
 		switch (operation)
 		{
 		case '1': operationLineInput(); break;
+		case '2': operationPointLies();  break;
+		case '3': operationParallel(); break;
 		}
+		std::cout << "----------------------------\n";
+		std::cout << "Enter the number of operation you want to execute >> ";
 		std::cin >> operation;
 	}
+
 	return 0;
 }
 
@@ -226,7 +240,7 @@ void welcomeMessage()
 	std::cout << "7. Find the tangent of a parabolyc equation through a point\n";
 	std::cout << "8. Determine the intersection point of a line and a parabola\n";
 	std::cout << "9. Determime if four lines form a quadrilateral and its type. If they don't, show an appropriate message\n\n";
-	std::cout << "Press 0 if you want to exit.\n\n";
+	std::cout << "Press 0 if you want to quit.\n\n";
 
 }
 
@@ -234,11 +248,9 @@ void operationLineInput()
 {
 	char option = 'a';
 	double lineCoeff[3]{};
-
 	std::cout << "\nHow would you like to input your line?\n";
 	std::cout << "\t a. With coordinates\n \t b. With coefficents\n";
 	std::cout << "Choose a OR b >> ";
-	
 	std::cin >> option;
 
 	while (true)
@@ -253,15 +265,114 @@ void operationLineInput()
 				std::cin >> option;
 			}	
 	}
-
 	if (option == 'a')
 	{
-		//matrica
+		readLineCoordinates(lineCoeff,2);
 	}
 	else
 	{
-		std::cout << "Your line has equation ax+by+c=0. Please enter the coefficents a, b, c respectfully>> ";
-		std::cin >> lineCoeff[0] >> lineCoeff[1] >> lineCoeff[2];
+		readLineCoeffs(lineCoeff);
 	}
+
 	printEquation(lineCoeff);
+}
+
+void operationPointLies()
+{
+	double lineCoeff[3]{};
+	double pointCoordinates[2]{};
+
+	std::cout << "Enter point (x;y) coordinates: \n";
+	std::cout << "x = ";
+	std::cin >> pointCoordinates[0];
+	std::cout << "y = ";
+	std::cin >> pointCoordinates[1];
+	std::cout << '(' << pointCoordinates[0] << ';' << pointCoordinates[1] << ')'<<'\n';
+	readLineCoeffs(lineCoeff);
+	printEquation(lineCoeff);
+	if (pointLies(pointCoordinates, lineCoeff))
+	{
+		std::cout << "The point lies on the given line\n";
+	}
+	else
+	{
+		std::cout << "The point doesn't on the given line\n";
+	}
+}
+
+void operationParallel()
+{
+	double lineCoeff[3]{};
+	double pointCoordinates[2]{};
+	double parallelCoef[3]{};
+	std::cout << "Enter point (x;y) coordinates: \n";
+	std::cout << "x = ";
+	std::cin >> pointCoordinates[0];
+	std::cout << "y = ";
+	std::cin >> pointCoordinates[1];
+	std::cout << '(' << pointCoordinates[0] << ';' << pointCoordinates[1] << ')' << '\n';
+	readLineCoeffs(lineCoeff);
+
+	parallelLine(pointCoordinates, lineCoeff, parallelCoef);
+
+	std::cout << "Your paraellel line is: ";
+	printEquation(parallelCoef);
+}
+
+void readLineCoeffs(double lineCoeff[])
+{
+	std::cout << "Your line has equation ax+by+c=0. Please enter the coefficents a, b, c respectfully>> ";
+	while (true)
+	{
+		std::cin >> lineCoeff[0] >> lineCoeff[1] >> lineCoeff[2];
+		if (getAbs(lineCoeff[0]) <= epsilon && getAbs(lineCoeff[1]) <= epsilon)
+		{
+			std::cout<<"Coefficents a and be CAN'T be both 0 zeros simultaneously. Try again>> ";
+		}
+		else
+		{
+			break;
+		}
+	}
+}
+
+void readLineCoordinates(double lineCoeff[], const int count)
+{
+	double coordinates[3][2]{};
+	while (true)
+	{
+		for (int i = 0; i < count; i++)
+		{
+			std::cout << "Point " << (i + 1) << "= ";
+
+			for (int j = 0; j < 2; j++)
+			{
+				std::cin >> coordinates[i][j];
+			}
+		}
+		if (validateCoordinates(coordinates, 2))
+		{
+			break;
+		}
+		else
+		{
+			std::cout << "You have entered the same coordinates. Try again\n";
+		}
+	}
+	calcEquationCoeff(coordinates, lineCoeff);
+}
+
+bool validateCoordinates(double coordinates[][2], const int count)
+{
+	for (int i = 0; i < count; i++)
+	{
+		for (int j = i + 1; j < count; j++)
+		{
+			if (coordinates[i][0] == coordinates[j][0] && coordinates[i][1] == coordinates[j][1])
+			{
+				return false;
+			}
+		}
+	}
+	return true;
 }
