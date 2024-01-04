@@ -2,7 +2,7 @@
 
 const double epsilon = 0.000001;
 
-void calcEquationCoeff(double [][2], double[]);
+void calcEquationCoeff(double [],double[], double[]);
 void printEquation(double[]);
 void simplify(double[]);
 bool pointLies(double[], double[]);
@@ -10,7 +10,7 @@ void parallelLine(double[], double[],double[]);
 void perpendicularLine(double[], double[], double[]);
 double getAbs(const double);
 void intersectionPoint(double[], double[], double[]);
-void getMidPoint(double[], double, double[]);
+void getMidPoint(double[], double[], double[]);
 
 void welcomeMessage();
 
@@ -24,7 +24,7 @@ void operationTriangle();
 void readLineCoeffs(double[]);
 void readLineCoordinates(double[], const int);
 bool validateCoordinates(double[][2], int); // checks if all points have unique coordinates
-
+double calcArea(double[][2]);
 
 //proverka dali koordinatite sa razlichni
 //sukrushtavane na koef
@@ -63,6 +63,7 @@ int main()
 		case '3': operationParallel(); break;
 		case '4': operationPerpendicular(); break;
 		case '5': operationIntersectLines(); break;
+		case '6': operationTriangle(); break;
 		}
 		std::cout << "----------------------------\n";
 		std::cout << "Enter the number of operation you want to execute >> ";
@@ -77,12 +78,12 @@ double getAbs(double num)
 	return (num >= 0) ? num : -num;
 }
 
-void calcEquationCoeff(double pointCoordinates[][2], double lineCoeff[])
+void calcEquationCoeff(double firstPoint[],double secondPoint[], double lineCoeff[])
 {
 
-	lineCoeff[0] = pointCoordinates[1][1] - pointCoordinates[0][1];
-	lineCoeff[1] = pointCoordinates[0][0] - pointCoordinates[1][0];
-	lineCoeff[2] = pointCoordinates[1][0] * pointCoordinates[0][1] - pointCoordinates[0][0] * pointCoordinates[1][1];
+	lineCoeff[0] =secondPoint[1] - firstPoint[1];
+	lineCoeff[1] = firstPoint[0] - secondPoint[0];
+	lineCoeff[2] = secondPoint[0] * firstPoint[1] - firstPoint[0] * secondPoint[1];
 	
 }
 
@@ -226,8 +227,8 @@ void intersectionPoint(double firstLine[], double secondLine[], double intersect
 
 void getMidPoint(double firstPoint[], double secondPoint[], double midPoint[])
 {
-	midPoint[0] = firstPoint[0] / 2.00 + firstPoint[0] / 2.00;
-	midPoint[1] = firstPoint[1] / 2.00 + firstPoint[1] / 2.00;
+	midPoint[0] = firstPoint[0] / 2.00 + secondPoint[0] / 2.00;
+	midPoint[1] = firstPoint[1] / 2.00 + secondPoint[1] / 2.00;
 }
 
 void welcomeMessage()
@@ -365,14 +366,73 @@ void operationIntersectLines()
 
 void operationTriangle()
 {
-	double endges[3][2]{};
+	double vertices[3][2]{};
+	double midPoints[3][2]{};
 	double sideEquationCoeff[3][3]{};
+	double altitudeEquationCoeffs[3][3]{};
+	double medianEquationCoeffs[3][3]{};
+	double symetralEquationCoeffs[3][3]{};
+	double area = 0.00;
+	int counter = 0;
 
+	while (true)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			std::cout << "Enter Point " << i + 1 << "= ";
+			std::cin >> vertices[i][0] >> vertices[i][1];
+		}
+
+		area = calcArea(vertices);
+
+		if (area <= epsilon)
+		{
+			std::cout << "Triangle with such coordinates doesn't exist. Please, enter your coordinates again"<<'\n';
+		}
+		else
+		{
+			break;
+		}
+	}
 	for (int i = 0; i < 3; i++)
 	{
-		readLineCoordinates(sideEquationCoeff[i], 3);
+		for (int j = i + 1; j < 3; j++)
+		{
+			calcEquationCoeff(vertices[i], vertices[j], sideEquationCoeff[counter]);
+			printEquation(sideEquationCoeff[counter]);
+			getMidPoint(vertices[i], vertices[j], midPoints[counter]);
+			counter++;
+		}
+	}
+	std::cout << '\n';
+	counter = 2;
+	std::cout << "Altitudes: \n";
+
+	for (int i = 0; i < 3; i++)
+	{	
+		perpendicularLine(vertices[counter], sideEquationCoeff[i],altitudeEquationCoeffs[i]);
+		printEquation(altitudeEquationCoeffs[i]);
+		counter--;
 	}
 
+	counter = 2;
+	std::cout << '\n';
+	std::cout << "Medians: \n";
+	for (int i = 0; i < 3; i++)
+	{
+		calcEquationCoeff(vertices[i], midPoints[counter], medianEquationCoeffs[i]);
+		printEquation(medianEquationCoeffs[i]);
+		counter--;
+	}
+
+	std::cout << '\n';
+	std::cout << "Symetrals: \n";
+	for (int i = 0; i < 3; i++)
+	{
+		perpendicularLine(midPoints[i], sideEquationCoeff[i], symetralEquationCoeffs[i]);
+		printEquation(symetralEquationCoeffs[i]);
+	}
+	
 }
 
 void readLineCoeffs(double lineCoeff[])
@@ -393,8 +453,8 @@ void readLineCoeffs(double lineCoeff[])
 }
 
 void readLineCoordinates(double lineCoeff[], const int count)
-{
-	double coordinates[3][2]{};
+{ 
+	double coordinates[2][2]{};
 	while (true)
 	{
 		for (int i = 0; i < count; i++)
@@ -406,7 +466,7 @@ void readLineCoordinates(double lineCoeff[], const int count)
 				std::cin >> coordinates[i][j];
 			}
 		}
-		if (validateCoordinates(coordinates, 2))
+		if (validateCoordinates(coordinates, count))
 		{
 			break;
 		}
@@ -415,7 +475,7 @@ void readLineCoordinates(double lineCoeff[], const int count)
 			std::cout << "You have entered the same coordinates. Try again\n";
 		}
 	}
-	calcEquationCoeff(coordinates, lineCoeff);
+			calcEquationCoeff(coordinates[0], coordinates[1], lineCoeff);
 }
 
 bool validateCoordinates(double coordinates[][2], const int count)
@@ -431,4 +491,11 @@ bool validateCoordinates(double coordinates[][2], const int count)
 		}
 	}
 	return true;
+}
+
+double calcArea(double coord[][2])
+{
+	double result = 0.5 * (coord[0][0]*(coord[1][1]-coord[2][1])+coord[0][1]*(coord[2][1]-coord[0][1])+coord[2][0]*(coord[0][1]-coord[1][1]));
+	result = getAbs(result);
+	return result;
 }
