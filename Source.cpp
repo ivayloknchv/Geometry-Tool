@@ -6,6 +6,7 @@ const double epsilon = 0.000001;
 void calcEquationCoeff(double[], double[], double[]);
 void printEquation(double[]);
 void printParabola(double[]);
+void printIntersectionPoints(double[], double[]);
 void simplify(double[]);
 bool pointLies(double[], double[]);
 void parallelLine(double[], double[], double[]);
@@ -21,6 +22,7 @@ double calculatePerimeter(double[][2]);
 double calculateDistance(double[], double[]);
 bool quadraticEquation(double[],double[]);
 double valueOfLinFunc(double[], double);
+double valueOfParabola(double[], double);
 void welcomeMessage();
 void triangleMessage(char&);
 
@@ -110,6 +112,12 @@ double valueOfLinFunc(double lineCoeffs[], double var)
 {
 	double value = -(lineCoeffs[0] * var + lineCoeffs[2]) / lineCoeffs[1];
 
+	return value;
+}
+
+double valueOfParabola(double parabolaCoeffs[], double var)
+{
+	double value = parabolaCoeffs[0] * var * var + parabolaCoeffs[1] * var + parabolaCoeffs[2];
 	return value;
 }
 
@@ -505,9 +513,7 @@ void operationIntersectParabolaLine()
 {
 	double parabolaCoeffs[3];
 	double lineCoeffs[3];
-	double newCoeffs[3]{};
-	double roots[2]{};
-
+	
 	readParabolaCoeffs(parabolaCoeffs);
 	readLineCoeffs(lineCoeffs);
 
@@ -517,6 +523,23 @@ void operationIntersectParabolaLine()
 	std::cout << "Your line is: ";
 	printEquation(lineCoeffs);
 	std::cout << '\n';
+
+	printIntersectionPoints(parabolaCoeffs, lineCoeffs);
+}
+
+void printIntersectionPoints(double parabolaCoeffs[], double lineCoeffs[])
+{
+	if (lineCoeffs[1] == 0) // ax+c=0
+	{
+		std::cout << "Your parabola and line intersect in: ";
+		double value = valueOfParabola(parabolaCoeffs, -lineCoeffs[2]/lineCoeffs[0]);
+		std::cout << '(' << -lineCoeffs[2] / lineCoeffs[0] << " ; " << value << ')';
+		std::cout << '\n';
+		return;
+	}
+
+	double newCoeffs[3]{}; //| ax^2+bx+c=y
+	double roots[2]{};	   //| mx+ny+p=0 we express y from the line and plug it into the parabola to calculte the x's both intersect in
 
 	newCoeffs[0] = parabolaCoeffs[0] * lineCoeffs[1];
 	newCoeffs[1] = parabolaCoeffs[1] * lineCoeffs[1] + lineCoeffs[0];
@@ -535,7 +558,7 @@ void operationIntersectParabolaLine()
 			double value1 = valueOfLinFunc(lineCoeffs, roots[0]);
 			double value2 = valueOfLinFunc(lineCoeffs, roots[1]);
 			std::cout << "Two intersection points: ";
-			std::cout << '('<<roots[0] <<" ; "<< value1 <<')';
+			std::cout << '(' << roots[0] << " ; " << value1 << ')';
 			std::cout << " (" << roots[1] << " ; " << value2 << ')';
 			std::cout << '\n';
 		}
