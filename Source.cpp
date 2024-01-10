@@ -23,6 +23,8 @@ double calculateDistance(double[], double[]);
 bool quadraticEquation(double[],double[]);
 double valueOfLinFunc(double[], double);
 double valueOfParabola(double[], double);
+void calculateTangentCoeffs(double[], double, double, double[]);
+void printTangents(double[], double[]);
 void welcomeMessage();
 void triangleMessage(char&);
 
@@ -33,6 +35,7 @@ void operationPerpendicular();
 void operationIntersectLines();
 void operationTriangle();
 void operationIntersectParabolaLine();
+void operationTangents();
 
 void readLineCoeffs(double[]);
 void readLineCoordinates(double[], const int);
@@ -74,7 +77,7 @@ int main()
 		case '4': operationPerpendicular(); break;
 		case '5': operationIntersectLines(); break;
 		case '6': operationTriangle(); break;
-		case '7': break;
+		case '7':  operationTangents(); break;
 		case '8': operationIntersectParabolaLine();  break;
 		}
 		std::cout << "----------------------------\n";
@@ -97,7 +100,7 @@ bool quadraticEquation(double coeffs[], double roots[])
 
 	if (discriminamt < 0)
 	{
-		std::cout << "No real roots!\n";
+
 		return false;
 	}
 	else if(discriminamt>=0)
@@ -132,8 +135,6 @@ void calcEquationCoeff(double firstPoint[], double secondPoint[], double lineCoe
 
 void printEquation(double lineCoeff[])
 {
-
-
 	simplify(lineCoeff);
 	if (lineCoeff[0] != 0)
 	{
@@ -509,6 +510,70 @@ void operationTriangle()
 	}
 }
 
+void operationTangents()
+{
+	double parabolaCoeffs[3]{};
+	double pointCoordinates[2]{};
+	
+
+	readParabolaCoeffs(parabolaCoeffs);
+	std::cout << "Your parabola is: ";
+	printParabola(parabolaCoeffs);
+	std::cout << '\n';
+	std::cout << "Enter a point (x;y) you want to find a tangent through >> ";
+	std::cin >> pointCoordinates[0]>>pointCoordinates[1];
+	std::cout << "Your point is (" << pointCoordinates[0] <<';'<<pointCoordinates[1]<<')'<<'\n';
+
+	printTangents(parabolaCoeffs, pointCoordinates);
+}
+
+void printTangents(double parabolaCoeffs[], double pointCoordinates[])
+{
+	double tangentCoeffs[3]{};
+
+	double valueofX = valueOfParabola(parabolaCoeffs, pointCoordinates[0]);
+
+	if (getAbs(valueofX - pointCoordinates[1]) <= epsilon) // the point lies on the parabola so we have one tangent only
+	{
+		std::cout << "Only one tangent passes through your parabola: ";
+		calculateTangentCoeffs(parabolaCoeffs, pointCoordinates[0], pointCoordinates[1], tangentCoeffs);
+		printEquation(tangentCoeffs);
+	}
+
+	else // we may have 2 or 0 tangents here
+	{
+		double newCoeffs[3]{}, helpPoints[2]{}; // we try to find points on our parabola the tangents also pass through
+		double valueY = 0;
+		newCoeffs[0] = -parabolaCoeffs[0];
+		newCoeffs[1] = 2 * parabolaCoeffs[0] * pointCoordinates[0];
+		newCoeffs[2] = parabolaCoeffs[1] * pointCoordinates[0] + parabolaCoeffs[2] - pointCoordinates[1];
+		
+		if (quadraticEquation(newCoeffs, helpPoints))
+		{
+				std::cout << "Two tangents pass through your parabola: ";
+				valueY = valueOfParabola(parabolaCoeffs, helpPoints[0]);
+				calculateTangentCoeffs(parabolaCoeffs, helpPoints[0], valueY, tangentCoeffs);
+				printEquation(tangentCoeffs);
+
+				valueY = valueOfParabola(parabolaCoeffs, helpPoints[1]);
+				calculateTangentCoeffs(parabolaCoeffs, helpPoints[1], valueY, tangentCoeffs);
+				printEquation(tangentCoeffs);
+		}
+		else
+		{
+			std::cout << "No tangents passing through this point!\n";
+		}
+	}
+}
+
+void calculateTangentCoeffs(double parabolaCoeffs[], double pointX, double pointY, double tangentCoeffs[])
+{
+	// y=y'(x0)*(x-x0)+y0 where (x0;y0) lies on the parabola
+	tangentCoeffs[0] = 2 * parabolaCoeffs[0] * pointX + parabolaCoeffs[1];
+	tangentCoeffs[1] = -1;
+	tangentCoeffs[2] = -2 * parabolaCoeffs[0] * pointX*pointX - parabolaCoeffs[1] * pointX + pointY;
+}
+
 void operationIntersectParabolaLine()
 {
 	double parabolaCoeffs[3];
@@ -562,6 +627,10 @@ void printIntersectionPoints(double parabolaCoeffs[], double lineCoeffs[])
 			std::cout << " (" << roots[1] << " ; " << value2 << ')';
 			std::cout << '\n';
 		}
+	}
+	else
+	{
+		std::cout << "No real roots!\n";
 	}
 }
 
