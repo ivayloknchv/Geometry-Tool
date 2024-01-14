@@ -20,6 +20,7 @@ void printSymetrals(double[][3], double[][2]);
 double calculateArea(double[][2]);
 double calculatePerimeter(double[][2]);
 double calculateDistance(double[], double[]);
+double calculateDistanceBetweenParallel(double[], double[]);
 bool quadraticEquation(double[],double[]);
 double valueOfLinFunc(double[], double);
 double valueOfParabola(double[], double);
@@ -27,6 +28,9 @@ void calculateTangentCoeffs(double[], double, double, double[]);
 void printTangents(double[], double[]);
 void welcomeMessage();
 void triangleMessage(char&);
+bool checkIfQuadExists(double[][3], int[], int&);
+void determineQuadType(double[][3], int[], int&);
+
 
 void operationLineInput();
 void operationPointLies();
@@ -36,6 +40,7 @@ void operationIntersectLines();
 void operationTriangle();
 void operationIntersectParabolaLine();
 void operationTangents();
+void operationQuadrilateral();
 
 void readLineCoeffs(double[]);
 void readLineCoordinates(double[], const int);
@@ -79,6 +84,7 @@ int main()
 		case '6': operationTriangle(); break;
 		case '7':  operationTangents(); break;
 		case '8': operationIntersectParabolaLine();  break;
+		case '9': operationQuadrilateral(); break;
 		}
 		std::cout << "----------------------------\n";
 		std::cout << "Enter the number of operation you want to execute >> ";
@@ -510,6 +516,24 @@ void operationTriangle()
 	}
 }
 
+void operationIntersectParabolaLine()
+{
+	double parabolaCoeffs[3];
+	double lineCoeffs[3];
+
+	readParabolaCoeffs(parabolaCoeffs);
+	readLineCoeffs(lineCoeffs);
+
+	std::cout << "Your parabola is: ";
+	printParabola(parabolaCoeffs);
+	std::cout << '\n';
+	std::cout << "Your line is: ";
+	printEquation(lineCoeffs);
+	std::cout << '\n';
+
+	printIntersectionPoints(parabolaCoeffs, lineCoeffs);
+}
+
 void operationTangents()
 {
 	double parabolaCoeffs[3]{};
@@ -525,6 +549,105 @@ void operationTangents()
 	std::cout << "Your point is (" << pointCoordinates[0] <<';'<<pointCoordinates[1]<<')'<<'\n';
 
 	printTangents(parabolaCoeffs, pointCoordinates);
+}
+
+void operationQuadrilateral()
+{
+	double sides[4][3]{};
+	int perpendicularCounter = 0; //keeps the counter of perpendicular lines 
+	int parallelHist[4] = {-1,-1,-1,-1}; //keeps the index of the line each line is parallel to; default values -1 to prevent inconsintencies
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::cout << "Line " << i+1 << ": ";
+		readLineCoeffs(sides[i]);
+	}
+
+	if (!checkIfQuadExists(sides, parallelHist,perpendicularCounter))
+	{
+		std::cout << "The lines don't form a quadrilateral!" << std::endl;
+	}
+	else
+	{
+		determineQuadType(sides, parallelHist,perpendicularCounter);
+	}
+}
+
+bool checkIfQuadExists(double sides[][3], int parallelHist[], int& perpendicularCounter)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = i + 1; j < 4; j++)
+		{		
+			if (getAbs(sides[i][0] * sides[j][1] - sides[i][1] * sides[j][0]) <= epsilon) // both lines either are parallel or coincide 
+			{
+				if (getAbs(sides[i][1] * sides[j][2] - sides[i][2] * sides[j][1]) <= epsilon) // lines coincide; all 3 coeffs are proportional
+				{
+					return false;
+				}
+				else
+				{
+					if (parallelHist[i] != -1) // more than 2 lines are parallel of each other
+					{
+						return false;
+					}
+					parallelHist[i] = j;
+				}
+			}
+
+			if (getAbs(sides[i][0] * sides[j][0] + sides[i][1] * sides[j][1])<=epsilon)
+			{
+				perpendicularCounter++;
+			}
+		}
+	}
+	return true;
+}
+
+void determineQuadType(double sides[][3], int parallelHist[], int& perpendicularCounter)
+{
+	int totalParalellelLines = 0;
+	double dist = 0.00;
+
+	for (int i = 0; i < 4; i++)
+	{
+		if (parallelHist[i] != -1)
+		{
+			totalParalellelLines++;
+		}
+	}
+
+	if (totalParalellelLines == 1) //only one pair of lines is parallel
+	{
+		if (perpendicularCounter == 2)
+		{
+			std::cout << "This is a right trapezoid" << std::endl;
+		}
+		else
+		{
+			std::cout << "This is a trapezoid" << std::endl;
+		}
+	}
+	else if (totalParalellelLines == 2) // all 4 lines ara parallel of one another
+	{
+		if (perpendicularCounter == 4)
+		{
+
+		}
+		else if (perpendicularCounter == 0)
+		{
+
+		}
+	}
+	else
+	{
+		std::cout << "This is an irregular  quadrilateral" << std::endl;
+	}
+}
+
+double calculateDistanceBetweenParallel(double lineOne[], double lineTwo[])
+{
+	return;
 }
 
 void printTangents(double parabolaCoeffs[], double pointCoordinates[])
@@ -572,24 +695,6 @@ void calculateTangentCoeffs(double parabolaCoeffs[], double pointX, double point
 	tangentCoeffs[0] = 2 * parabolaCoeffs[0] * pointX + parabolaCoeffs[1];
 	tangentCoeffs[1] = -1;
 	tangentCoeffs[2] = -2 * parabolaCoeffs[0] * pointX*pointX - parabolaCoeffs[1] * pointX + pointY;
-}
-
-void operationIntersectParabolaLine()
-{
-	double parabolaCoeffs[3];
-	double lineCoeffs[3];
-	
-	readParabolaCoeffs(parabolaCoeffs);
-	readLineCoeffs(lineCoeffs);
-
-	std::cout << "Your parabola is: ";
-	printParabola(parabolaCoeffs);
-	std::cout << '\n';
-	std::cout << "Your line is: ";
-	printEquation(lineCoeffs);
-	std::cout << '\n';
-
-	printIntersectionPoints(parabolaCoeffs, lineCoeffs);
 }
 
 void printIntersectionPoints(double parabolaCoeffs[], double lineCoeffs[])
