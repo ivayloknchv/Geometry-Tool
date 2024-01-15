@@ -22,9 +22,9 @@ double calculatePerimeter(double[][2]);
 double calculateDistance(double[], double[]);
 double calculateDistanceBetweenParallel(double[], double[]);
 bool quadraticEquation(double[],double[]);
-double valueOfLinFunc(double[], double);
-double valueOfParabola(double[], double);
-void calculateTangentCoeffs(double[], double, double, double[]);
+double valueOfLinFunc(double[], double&);
+double valueOfParabola(double[], double&);
+void calculateTangentCoeffs(double[], double&, double&, double[]);
 void printTangents(double[], double[]);
 void welcomeMessage();
 void triangleMessage(char&);
@@ -94,7 +94,7 @@ int main()
 	return 0;
 }
 
-double getAbs(double num)
+double getAbs(const double num)
 {
 	return (num >= 0) ? num : -num;
 }
@@ -117,14 +117,14 @@ bool quadraticEquation(double coeffs[], double roots[])
 	return true;
 }
 
-double valueOfLinFunc(double lineCoeffs[], double var)
+double valueOfLinFunc(double lineCoeffs[], double& var)
 {
 	double value = -(lineCoeffs[0] * var + lineCoeffs[2]) / lineCoeffs[1];
 
 	return value;
 }
 
-double valueOfParabola(double parabolaCoeffs[], double var)
+double valueOfParabola(double parabolaCoeffs[], double& var)
 {
 	double value = parabolaCoeffs[0] * var * var + parabolaCoeffs[1] * var + parabolaCoeffs[2];
 	return value;
@@ -579,20 +579,23 @@ bool checkIfQuadExists(double sides[][3], int parallelHist[], int& perpendicular
 	{
 		for (int j = i + 1; j < 4; j++)
 		{		
+			
 			if (getAbs(sides[i][0] * sides[j][1] - sides[i][1] * sides[j][0]) <= epsilon) // both lines either are parallel or coincide 
 			{
 				if (getAbs(sides[i][1] * sides[j][2] - sides[i][2] * sides[j][1]) <= epsilon) // lines coincide; all 3 coeffs are proportional
 				{
-					return false;
+					if (getAbs(sides[i][0] * sides[j][2] - sides[i][2] * sides[j][0]) <= epsilon)
+					{
+						return false;
+					}
 				}
-				else
-				{
+
+				
 					if (parallelHist[i] != -1) // more than 2 lines are parallel of each other
 					{
 						return false;
 					}
 					parallelHist[i] = j;
-				}
 			}
 
 			if (getAbs(sides[i][0] * sides[j][0] + sides[i][1] * sides[j][1])<=epsilon)
@@ -606,18 +609,21 @@ bool checkIfQuadExists(double sides[][3], int parallelHist[], int& perpendicular
 
 void determineQuadType(double sides[][3], int parallelHist[], int& perpendicularCounter)
 {
-	int totalParalellelLines = 0;
+	int totalParalellelPairs = 0;
 	double dist = 0.00;
+	int parallelPairs[2][2]{};
 
 	for (int i = 0; i < 4; i++)
 	{
 		if (parallelHist[i] != -1)
 		{
-			totalParalellelLines++;
+			parallelPairs[totalParalellelPairs][0] = parallelHist[i];
+			parallelPairs[totalParalellelPairs][1] = i;
+			totalParalellelPairs++;
 		}
 	}
 
-	if (totalParalellelLines == 1) //only one pair of lines is parallel
+	if (totalParalellelPairs == 1) //only one pair of lines is parallel
 	{
 		if (perpendicularCounter == 2)
 		{
@@ -628,15 +634,32 @@ void determineQuadType(double sides[][3], int parallelHist[], int& perpendicular
 			std::cout << "This is a trapezoid" << std::endl;
 		}
 	}
-	else if (totalParalellelLines == 2) // all 4 lines ara parallel of one another
+	else if (totalParalellelPairs == 2) // all 4 lines are parallel of one another
 	{
-		if (perpendicularCounter == 4)
-		{
+		double dist1 = calculateDistanceBetweenParallel(sides[parallelPairs[0][0]], sides[parallelPairs[0][1]]);
+		double dist2 = calculateDistanceBetweenParallel(sides[parallelPairs[1][0]], sides[parallelPairs[1][1]]);
 
+		if (perpendicularCounter == 4) // square or rectangle
+		{
+			if (getAbs(dist1 - dist2) <= epsilon)
+			{
+				std::cout << "This is a square"<<std::endl;
+			}
+			else
+			{
+				std::cout << "This is a rectangle" << std::endl;
+			}
 		}
-		else if (perpendicularCounter == 0)
+		else if (perpendicularCounter == 0) // rhombus or parallelogram
 		{
-
+			if (getAbs(dist1 - dist2) <= epsilon)
+			{
+				std::cout << "This is a rhombus" << std::endl;
+			}
+			else
+			{
+				std::cout << "This is a parallelogram" << std::endl;
+			}
 		}
 	}
 	else
@@ -647,7 +670,24 @@ void determineQuadType(double sides[][3], int parallelHist[], int& perpendicular
 
 double calculateDistanceBetweenParallel(double lineOne[], double lineTwo[])
 {
-	return;
+	double distance = 0.00;
+
+	if (lineOne[1] == 0 && lineTwo[1] == 0) //ax+c=0 , mx+n=0
+	{
+		distance = getAbs(-lineOne[2] / lineOne[0] + lineTwo[2] / lineTwo[0]);
+	}
+
+	else if (lineOne[0] == 0 && lineTwo[0] == 0) //by+c=0 , py+n=0
+	{
+		distance = getAbs(-lineOne[2] / lineOne[1] + lineTwo[2] / lineTwo[1]);
+	}
+	
+	else // we exress both lines in slope-intercent form to find the distance between them using the formula
+	{
+		distance = getAbs(-lineTwo[2] / lineTwo[1] + lineOne[2] / lineOne[1]);
+		distance /= sqrt((lineOne[0] / lineOne[1])* (lineOne[0] / lineOne[1])+1);
+	}
+	return distance;
 }
 
 void printTangents(double parabolaCoeffs[], double pointCoordinates[])
@@ -673,7 +713,7 @@ void printTangents(double parabolaCoeffs[], double pointCoordinates[])
 		
 		if (quadraticEquation(newCoeffs, helpPoints))
 		{
-				std::cout << "Two tangents pass through your parabola: ";
+				std::cout << "Two tangents pass through your parabola: "<<std::endl;
 				valueY = valueOfParabola(parabolaCoeffs, helpPoints[0]);
 				calculateTangentCoeffs(parabolaCoeffs, helpPoints[0], valueY, tangentCoeffs);
 				printEquation(tangentCoeffs);
@@ -689,7 +729,7 @@ void printTangents(double parabolaCoeffs[], double pointCoordinates[])
 	}
 }
 
-void calculateTangentCoeffs(double parabolaCoeffs[], double pointX, double pointY, double tangentCoeffs[])
+void calculateTangentCoeffs(double parabolaCoeffs[], double& pointX, double& pointY, double tangentCoeffs[])
 {
 	// y=y'(x0)*(x-x0)+y0 where (x0;y0) lies on the parabola
 	tangentCoeffs[0] = 2 * parabolaCoeffs[0] * pointX + parabolaCoeffs[1];
@@ -702,7 +742,8 @@ void printIntersectionPoints(double parabolaCoeffs[], double lineCoeffs[])
 	if (lineCoeffs[1] == 0) // ax+c=0
 	{
 		std::cout << "Your parabola and line intersect in: ";
-		double value = valueOfParabola(parabolaCoeffs, -lineCoeffs[2]/lineCoeffs[0]);
+		double xValue = -lineCoeffs[2] / lineCoeffs[0];
+		double value = valueOfParabola(parabolaCoeffs, xValue);
 		std::cout << '(' << -lineCoeffs[2] / lineCoeffs[0] << " ; " << value << ')';
 		std::cout << '\n';
 		return;
