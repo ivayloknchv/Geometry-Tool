@@ -2,7 +2,7 @@
 #include <cmath>
 
 const double epsilon = 0.000001;
-
+const int MAX_LEN = 10;
 void calcEquationCoeff(double[], double[], double[]);
 void printEquation(double[]);
 void printParabola(double[]);
@@ -30,6 +30,10 @@ void welcomeMessage();
 void triangleMessage(char&);
 bool checkIfQuadExists(double[][3], int[], int&);
 void determineQuadType(double[][3], int[], int&);
+bool validateName(char*);
+bool checkAllNames(char[][MAX_LEN], const int);
+int strLen(char*);
+bool compareSymbolBySymbol(char*, char*, const int);
 
 
 void operationLineInput();
@@ -43,7 +47,7 @@ void operationTangents();
 void operationQuadrilateral();
 
 void readLineCoeffs(double[]);
-void readLineCoordinates(double[], const int);
+void readLineCoordinates(double[], const int, char[][MAX_LEN]);
 void readParabolaCoeffs(double[]);
 bool validateCoordinates(double[][2], int); // checks if all points have unique coordinates
 
@@ -371,11 +375,45 @@ void operationLineInput()
 	}
 	if (option == 'a' || option == 'A' )
 	{
-		readLineCoordinates(lineCoeff, 2);
+		char pointNames[2][MAX_LEN] = {};
+
+		while (true)
+		{
+			std::cin.ignore();
+
+			std::cout<< "Enter the name of point 1>> ";
+			std::cin >> pointNames[0];
+
+			
+			std::cout << "Enter the name of point 2>> ";
+			std::cin >> pointNames[1];
+
+			if (checkAllNames(pointNames, 2))
+			{
+				break;
+			}
+		}
+		readLineCoordinates(lineCoeff, 2, pointNames);
+		std::cout << "The line that passes through " << pointNames[0] << " and " << pointNames[1] << " is: ";
 	}
 	else
 	{
+		char lineName[MAX_LEN] = {};
+		
+		while (true)
+		{
+
+			std::cout << "Enter the name of the line here>> ";
+			std::cin >> lineName;
+
+			if (validateName(lineName))
+			{
+				break;
+			}
+
+		}
 		readLineCoeffs(lineCoeff);
+		std::cout << "Your line " << lineName << " looks like: ";
 	}
 
 	printEquation(lineCoeff);
@@ -907,14 +945,14 @@ void readParabolaCoeffs(double parabolaCoeffs[])
 	}
 }
 
-void readLineCoordinates(double lineCoeff[], const int count)
+void readLineCoordinates(double lineCoeff[], const int count, char names[][MAX_LEN])
 {
 	double coordinates[2][2]{};
 	while (true)
 	{
 		for (int i = 0; i < count; i++)
 		{
-			std::cout << "Point " << (i + 1) << "= ";
+			std::cout << "Coordinates of point " << names[i]<< " = ";
 
 			for (int j = 0; j < 2; j++)
 			{
@@ -953,4 +991,103 @@ double calculateArea(double coord[][2])
 	double result = 0.5 * (coord[0][0] * (coord[1][1] - coord[2][1]) + coord[1][0] * (coord[2][1] - coord[0][1]) + coord[2][0] * (coord[0][1] - coord[1][1]));
 	result = getAbs(result);
 	return result;
+}
+
+bool validateName(char* str)
+{
+	if (!str)
+	{
+		return false;;
+	}
+
+	while (*str != '\0')
+	{
+		if (*str >= '0' && *str <= '9' || *str=='_')
+		{
+			str++;
+		}
+		else if (*str >= 'a' && *str <= 'z')
+		{
+			str++;
+		}
+		else if (*str >= 'A' && *str <= 'Z')
+		{
+			str++;
+		}
+		else
+		{
+			std::cout<<"All names must only contain digits, letter and _ . Please, enter the lines of your geometric objects again!"<<std::endl;
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool checkAllNames(char str[][MAX_LEN], const int size)
+{
+	for (int i = 0; i < size; i++)
+	{
+		if (!validateName(str[i]))
+		{
+			return false;
+		}
+
+		for (int j = i + 1; j < size; j++)
+		{
+			if (strLen(str[i]) == strLen(str[j]))
+			{
+				if (compareSymbolBySymbol(str[i], str[j], strLen(str[i])))
+				{
+					std::cout<<"You have enteted the same name more than once! Please enter unique names only!"<<std::endl;
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+int strLen(char* str)
+{
+	if (!str)
+	{
+		return -1;
+	}
+
+	int len = 0;
+
+	while (*str != '\0')
+	{
+		len++;
+		str++;
+	}
+
+	return len;
+}
+
+bool compareSymbolBySymbol(char* str1, char* str2, const int size)
+{
+	int counter = 0;
+
+	while (*str1 != '\0')
+	{
+		if (*str1 == *str2)
+		{
+			str1++;
+			str2++;
+			counter++;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	if (counter == size )
+	{
+		return true;
+	}
+	return false;
 }
