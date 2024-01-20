@@ -2,17 +2,18 @@
 #include <cmath>
 
 const double epsilon = 0.000001;
-const int MAX_LEN = 10;
+const int MAX_LEN = 11;
+
 void calcEquationCoeff(double[], double[], double[]);
 void printEquation(double[]);
 void printParabola(double[]);
-void printIntersectionPoints(double[], double[]);
+void printIntersectionPoints(double[], double[],char[][MAX_LEN]);
 void simplify(double[]);
 bool pointLies(double[], double[]);
 void parallelLine(double[], double[], double[]);
 void perpendicularLine(double[], double[], double[]);
 double getAbs(const double);
-void intersectionPoint(double[], double[], double[]);
+void intersectionPoint(double[], double[], double[], char[][MAX_LEN]);
 void getMidPoint(double[], double[], double[]);
 void printAltitudes(double[][2], double[][3]);
 void printMedians(double[][2], double[][2]);
@@ -25,7 +26,7 @@ bool quadraticEquation(double[],double[]);
 double valueOfLinFunc(double[], double&);
 double valueOfParabola(double[], double&);
 void calculateTangentCoeffs(double[], double&, double&, double[]);
-void printTangents(double[], double[]);
+void printTangents(double[], double[], char [][MAX_LEN]);
 void welcomeMessage();
 void triangleMessage(char&);
 bool checkIfQuadExists(double[][3], int[], int&);
@@ -51,34 +52,29 @@ void readLineCoordinates(double[], const int, char[][MAX_LEN]);
 void readParabolaCoeffs(double[]);
 bool validateCoordinates(double[][2], int); // checks if all points have unique coordinates
 
-// zakruglqvane
-//sukrushtavane na koef
-//imena na tochki i pravi!!!!!!!
-
-
 int main()
 {
 	welcomeMessage();
 
-	char operation = '0';
-	std::cout << "Enter the number of operation you want to execute >> ";
-	std::cin >> operation;
-	while (operation != '0')
+	char problem = '0';
+	std::cout << "Enter the number of problem you want to execute >> ";
+	std::cin >> problem;
+	while (problem != '0')
 	{
 		while (true)
 		{
-			if (operation >= '1' && operation <= '9')
+			if (problem >= '1' && problem <= '9')
 			{
 				break;
 			}
 			else
 			{
 				std::cout << "Invalid number! Please, try again >> ";
-				std::cin >> operation;
+				std::cin >> problem;
 			}
 		}
 
-		switch (operation)
+		switch (problem)
 		{
 		case '1': operationLineInput(); break;
 		case '2': operationPointLies();  break;
@@ -90,11 +86,14 @@ int main()
 		case '8': operationIntersectParabolaLine();  break;
 		case '9': operationQuadrilateral(); break;
 		}
+
+		std::cout << std::endl;
 		std::cout << "----------------------------" << std::endl;
 		std::cout << "Enter the number of operation you want to execute >> ";
-		std::cin >> operation;
+		std::cin >> problem;
 	}
-
+	std::cout << std::endl;
+	std::cout << "Thank you for using Geometry Tool. Have fun doing Math!";
 	return 0;
 }
 
@@ -110,9 +109,9 @@ bool quadraticEquation(double coeffs[], double roots[])
 
 	if (discriminamt < 0)
 	{
-
 		return false;
 	}
+
 	else if(discriminamt>=0)
 	{
 		roots[0] = (-coeffs[1] + sqrt(discriminamt)) / (2 * coeffs[0]);
@@ -131,6 +130,7 @@ double valueOfLinFunc(double lineCoeffs[], double& var)
 double valueOfParabola(double parabolaCoeffs[], double& var)
 {
 	double value = parabolaCoeffs[0] * var * var + parabolaCoeffs[1] * var + parabolaCoeffs[2];
+
 	return value;
 }
 
@@ -146,6 +146,9 @@ void calcEquationCoeff(double firstPoint[], double secondPoint[], double lineCoe
 void printEquation(double lineCoeff[])
 {
 	simplify(lineCoeff);
+
+	//analyse all edge cases (coeffs are 0, 1 or -1) to print a well-looking result
+
 	if (lineCoeff[0] != 0)
 	{
 		if (lineCoeff[0] == 1)
@@ -216,6 +219,8 @@ void printEquation(double lineCoeff[])
 
 void printParabola(double parabolaCoeffs[])
 {
+	//analyse all edge cases (coeffs are 0, 1 or -1) to print a well-looking result
+
 	std::cout <<"y=";
 
 	if (parabolaCoeffs[0] == 1)
@@ -288,6 +293,8 @@ bool pointLies(double coordinates[], double lineCoeff[])
 
 void parallelLine(double pointCoordinates[], double lineCoeff[], double parallelCoeff[])
 {
+	// ax+by+n=0 ax+by+m=0 are parallel
+	// paralellel lines have proportional coeffs of x and y (or equal for easier calculations)
 	parallelCoeff[0] = lineCoeff[0];
 	parallelCoeff[1] = lineCoeff[1];
 	parallelCoeff[2] = -(parallelCoeff[0] * pointCoordinates[0] + parallelCoeff[1] * pointCoordinates[1]);
@@ -295,12 +302,14 @@ void parallelLine(double pointCoordinates[], double lineCoeff[], double parallel
 
 void perpendicularLine(double pointCoordinates[], double lineCoeff[], double perpendicularCoeff[])
 {
+	// ax+by+c=0 and mx+ny+p=0 are perpendicular if a*m+b*n=0
+
 	perpendicularCoeff[0] = -lineCoeff[1];
 	perpendicularCoeff[1] = lineCoeff[0];
 	perpendicularCoeff[2] = -(perpendicularCoeff[0] * pointCoordinates[0] + perpendicularCoeff[1] * pointCoordinates[1]);
 }
 
-void intersectionPoint(double firstLine[], double secondLine[], double intersection[])
+void intersectionPoint(double firstLine[], double secondLine[], double intersection[], char names[][MAX_LEN])
 {
 	//Using Cramer's rule to solve system of linear equations
 	// x = detA/det, y = detB/det
@@ -313,18 +322,18 @@ void intersectionPoint(double firstLine[], double secondLine[], double intersect
 	{
 		if (getAbs(detA) <= epsilon && getAbs(detB) <= epsilon)
 		{
-			std::cout << "Lines coincide" << std::endl;
+			std::cout << "Lines "<<names[0]<< " and "<< names[1]<<" coincide" << std::endl;
 		}
 		else
 		{
-			std::cout << "Lines are parallel. They don't intersect." << std::endl;
+			std::cout << "Lines " << names[0] << " and " << names[1] << " are parallel. They don't intersect." << std::endl;
 		}
 	}
 	else
 	{
 		intersection[0] = detA / det;
 		intersection[1] = detB / det;
-		std::cout << intersection[0] << ' ' << intersection[1] << std::endl;
+		std::cout << "Lines " << names[0] << " and " << names[1] <<" intersect in ("<< intersection[0] << ' ' << intersection[1]<<")" << std::endl;
 	}
 }
 
@@ -337,19 +346,18 @@ void getMidPoint(double firstPoint[], double secondPoint[], double midPoint[])
 void welcomeMessage()
 {
 	std::cout << "Welcome to Geometry Tool!" << std::endl << std::endl;
-	std::cout << "This mini project can help you solve the following Analytic geometry problems and operations: " << std::endl << std::endl;
+	std::cout << "This mini project can help you solve the following Analytic geometry problems: " << std::endl << std::endl;
 
 	std::cout << "1. Determine the equation of a line using its coefficents or two points and their coordinates" << std::endl;
 	std::cout << "2. Check if a point lies on a certain line" << std::endl;
 	std::cout << "3. Determine the equation of the line that passes through a point and is parallel to another line" << std::endl;
 	std::cout << "4. Determine the equation of the line that is perpendicular to another line and passes through a point that lies on the given line" << std::endl;
 	std::cout << "5. Find the intersection point of two lines, if it exists" << std::endl;
-	std::cout << "6. Determine the equations of all altitudes, medians and symetrals of a triangle defined by the coordinates of its vertices" << std::endl;
+	std::cout << "6. Determine the equations of all altitudes, medians, symetrals are and perimeter of a triangle defined by the coordinates of its vertices" << std::endl;
 	std::cout << "7. Find the tangent of a parabolyc equation through a point" << std::endl;
 	std::cout << "8. Determine the intersection point of a line and a parabola" << std::endl;
 	std::cout << "9. Determime if four lines form a quadrilateral and its type. If they don't, show an appropriate message" << std::endl << std::endl;
 	std::cout << "Press 0 if you want to quit." << std::endl << std::endl;
-
 }
 
 void operationLineInput()
@@ -361,7 +369,7 @@ void operationLineInput()
 	std::cout << "Choose a OR b >> ";
 	std::cin >> option;
 
-	while (true)
+	while (true) //validate option
 	{
 		if (option == 'a' || option == 'A' || option == 'b' || option == 'B')
 		{
@@ -372,45 +380,47 @@ void operationLineInput()
 			std::cout << "Invalid input! Please, enter a OR b >> \n";
 			std::cin >> option;
 		}
-	}
+	} 
+
 	if (option == 'a' || option == 'A' )
 	{
 		char pointNames[2][MAX_LEN] = {};
-
+		std::cin.ignore();
 		while (true)
 		{
-			std::cin.ignore();
-
 			std::cout<< "Enter the name of point 1>> ";
-			std::cin >> pointNames[0];
+			std::cin.getline(pointNames[0], MAX_LEN);
 
-			
 			std::cout << "Enter the name of point 2>> ";
-			std::cin >> pointNames[1];
+			std::cin.getline(pointNames[1], MAX_LEN);
 
 			if (checkAllNames(pointNames, 2))
 			{
 				break;
 			}
+
+			std::cin.clear();
 		}
 		readLineCoordinates(lineCoeff, 2, pointNames);
 		std::cout << "The line that passes through " << pointNames[0] << " and " << pointNames[1] << " is: ";
 	}
+
 	else
 	{
 		char lineName[MAX_LEN] = {};
-		
+		std::cin.ignore();
+
 		while (true)
 		{
-
 			std::cout << "Enter the name of the line here>> ";
-			std::cin >> lineName;
+
+			std::cin.getline(lineName, MAX_LEN);
 
 			if (validateName(lineName))
 			{
 				break;
-			}
-
+			}	
+			std::cin.clear();
 		}
 		readLineCoeffs(lineCoeff);
 		std::cout << "Your line " << lineName << " looks like: ";
@@ -423,22 +433,41 @@ void operationPointLies()
 {
 	double lineCoeff[3]{};
 	double pointCoordinates[2]{};
+	char names[2][MAX_LEN] = {};
 
-	std::cout << "Enter point (x;y) coordinates: " << std::endl;
-	std::cout << "x = ";
-	std::cin >> pointCoordinates[0];
-	std::cout << "y = ";
-	std::cin >> pointCoordinates[1];
-	std::cout << '(' << pointCoordinates[0] << ';' << pointCoordinates[1] << ')' << std::endl;
+	std::cin.ignore();
+
+	while (true)
+	{
+		std::cout << "Enter the name of the point>> ";
+		std::cin.getline(names[0], MAX_LEN);
+
+
+		std::cout << "Enter the name of the line>> ";
+		std::cin.getline(names[1], MAX_LEN);
+
+		if (checkAllNames(names, 2))
+		{
+			break;
+		}
+
+		std::cin.clear();
+	}
+
+	std::cout << "Enter point " << names[0] << " (x;y) coordinates>> ";
+	std::cin >> pointCoordinates[0]>>pointCoordinates[1];
+	std::cout <<names[0]<< " (" << pointCoordinates[0] << '; ' << pointCoordinates[1] << ')' << std::endl;
 	readLineCoeffs(lineCoeff);
+	std::cout << names[1] << ": ";
 	printEquation(lineCoeff);
+
 	if (pointLies(pointCoordinates, lineCoeff))
 	{
-		std::cout << "The point lies on the given line" << std::endl;
+		std::cout << "The point " << names[0] << " lies on line "<<names[1] << std::endl;
 	}
 	else
 	{
-		std::cout << "The point doesn't on the given line" << std::endl;
+		std::cout << "The point " << names[0] << " doesn't lie on on line " << names[1] << std::endl;
 	}
 }
 
@@ -447,17 +476,34 @@ void operationParallel()
 	double lineCoeff[3]{};
 	double pointCoordinates[2]{};
 	double parallelCoef[3]{};
-	std::cout << "Enter point (x;y) coordinates: " << std::endl;
-	std::cout << "x = ";
-	std::cin >> pointCoordinates[0];
-	std::cout << "y = ";
-	std::cin >> pointCoordinates[1];
-	std::cout << '(' << pointCoordinates[0] << ';' << pointCoordinates[1] << ')' << std::endl;
+
+	char names[2][MAX_LEN] = {};
+
+	std::cin.ignore();
+	while (true)
+	{
+		std::cout << "Enter the name of the point>> ";
+		std::cin.getline(names[0], MAX_LEN);
+
+
+		std::cout << "Enter the name of the line>> ";
+		std::cin.getline(names[1], MAX_LEN);
+
+		if (checkAllNames(names, 2))
+		{
+			break;
+		}
+
+		std::cin.clear();
+	}
+	std::cout << "Enter point " << names[0] << " (x;y) coordinates>> ";
+	std::cin >> pointCoordinates[0] >> pointCoordinates[1];
+	std::cout << names[0]<<'(' << pointCoordinates[0] << ';' << pointCoordinates[1] << ')' << std::endl;
 	readLineCoeffs(lineCoeff);
 
 	parallelLine(pointCoordinates, lineCoeff, parallelCoef);
 
-	std::cout << "Your new paraellel line is: ";
+	std::cout << "Your new line parallel of "<<names[1]<<" is: ";
 	printEquation(parallelCoef);
 }
 
@@ -465,26 +511,42 @@ void operationPerpendicular()
 {
 	double lineCoeff[3]{};
 	double pointCoordinates[2]{};
+	char names[2][MAX_LEN] = {};
 
-	std::cout << "Enter point (x;y) coordinates: " << std::endl;
-	std::cout << "x = ";
-	std::cin >> pointCoordinates[0];
-	std::cout << "y = ";
-	std::cin >> pointCoordinates[1];
-	std::cout << '(' << pointCoordinates[0] << ';' << pointCoordinates[1] << ')' << std::endl;
+	std::cin.ignore();
+	while (true)
+	{
+		std::cout << "Enter the name of the point>> ";
+		std::cin.getline(names[0], MAX_LEN);
+
+
+		std::cout << "Enter the name of the line>> ";
+		std::cin.getline(names[1], MAX_LEN);
+
+		if (checkAllNames(names, 2))
+		{
+			break;
+		}
+
+		std::cin.clear();
+	}
+
+	std::cout << "Enter point " << names[0] << " (x;y) coordinates>> ";
+	std::cin >> pointCoordinates[0] >> pointCoordinates[1];
+	std::cout << names[0] << '(' << pointCoordinates[0] << ';' << pointCoordinates[1] << ')' << std::endl;
 	readLineCoeffs(lineCoeff);
 
 	if (pointLies(pointCoordinates, lineCoeff))
 	{
 		double perpendicularCoef[3]{};
 		perpendicularLine(pointCoordinates, lineCoeff, perpendicularCoef);
-		std::cout << "Your new perpendicular line is: ";
+		std::cout << "Your new line perpendicular of "<< names[1]  <<" is: ";
 		printEquation(perpendicularCoef);
 	}
 
 	else
 	{
-		std::cout << "The line doesn't pass through the point" << std::endl;
+		std::cout << "The line" <<names[1]<<" doesn't pass through the point "<<names[0] << std::endl;
 	}
 
 }
@@ -494,11 +556,35 @@ void operationIntersectLines()
 	double firstLineCoeffs[3]{};
 	double secondLineCoeffs[3]{};
 	double intersect[2]{};
+
+	char lineNames[2][MAX_LEN] = {};
+
+	std::cin.ignore();
+	while (true)
+	{
+		std::cout << "Enter the name of the first line>> ";
+		std::cin.getline(lineNames[0], MAX_LEN);
+
+
+		std::cout << "Enter the name of the second line>> ";
+		std::cin.getline(lineNames[1], MAX_LEN);
+
+		if (checkAllNames(lineNames, 2))
+		{
+			break;
+		}
+
+		std::cin.clear();
+	}
+	
 	readLineCoeffs(firstLineCoeffs);
+
 	readLineCoeffs(secondLineCoeffs);
+	std::cout << lineNames[0] << ": ";
 	printEquation(firstLineCoeffs);
+	std::cout << lineNames[1] << ": ";
 	printEquation(secondLineCoeffs);
-	intersectionPoint(firstLineCoeffs, secondLineCoeffs, intersect);
+	intersectionPoint(firstLineCoeffs, secondLineCoeffs, intersect, lineNames);
 }
 
 void operationTriangle()
@@ -506,22 +592,40 @@ void operationTriangle()
 	double vertices[3][2]{};
 	double midPoints[3][2]{};
 	double sideEquationCoeff[3][3]{};
-
+	char pointNames[3][MAX_LEN] = {};
 	double area = 0.00;
 	int counter = 0;
 	char optionTriangle = 'a';
 	
+
+	std::cin.ignore();
 	while (true)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			std::cout << "Enter Point " << i + 1 << "= ";
+			std::cout << "Enter the name of point "<< i+1 << " >> ";
+			std::cin.getline(pointNames[i], MAX_LEN);
+		}
+
+		if (checkAllNames(pointNames, 3))
+		{
+			break;
+		}
+
+		std::cin.clear();
+	}
+
+	while (true)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			std::cout << "Enter coordinates point " << pointNames[i] << " (x;y) >> ";
 			std::cin >> vertices[i][0] >> vertices[i][1];
 		}
 
 		area = calculateArea(vertices);
 
-		if (area <= epsilon)
+		if (area <= epsilon) // triangle with area = 0 doesn't exist
 		{
 			std::cout << "Triangle with such coordinates doesn't exist. Please, enter your coordinates again" << std::endl;
 		}
@@ -530,7 +634,9 @@ void operationTriangle()
 			break;
 		}
 	}
-	std::cout << "Your triangle has equations : " << std::endl;
+	std::cout<<std::endl;
+	std::cout << "Your triangle has equations: " << std::endl;
+
 	for (int i = 0; i < 3; i++)
 	{
 		for (int j = i + 1; j < 3; j++)
@@ -541,7 +647,7 @@ void operationTriangle()
 			counter++;
 		}
 	}
-
+	std::cout << std::endl;
 	triangleMessage(optionTriangle);
 
 	switch (optionTriangle)
@@ -549,7 +655,7 @@ void operationTriangle()
 	case 'a': printAltitudes(vertices, sideEquationCoeff); break;
 	case 'b': printMedians(vertices, midPoints); break;
 	case 'c': printSymetrals(sideEquationCoeff, midPoints); break;
-	case 'd': std::cout << "Area = " << area << std::endl;
+	case 'd': std::cout << "Area = " << area << std::endl; break;
 	case 'e': std::cout << "Perimeter = " << calculatePerimeter(vertices) << std::endl; break;
 	}
 }
@@ -558,18 +664,37 @@ void operationIntersectParabolaLine()
 {
 	double parabolaCoeffs[3];
 	double lineCoeffs[3];
+	char names[2][MAX_LEN] = {};
+
+	std::cin.ignore();
+	while (true)
+	{
+		std::cout << "Enter the name of the parabola>> ";
+		std::cin.getline(names[0], MAX_LEN);
+
+
+		std::cout << "Enter the name of the line>> ";
+		std::cin.getline(names[1], MAX_LEN);
+
+		if (checkAllNames(names, 2))
+		{
+			break;
+		}
+
+		std::cin.clear();
+	}
 
 	readParabolaCoeffs(parabolaCoeffs);
 	readLineCoeffs(lineCoeffs);
 
-	std::cout << "Your parabola is: ";
+	std::cout << "Your parabola "<< names[0]<<" is: ";
 	printParabola(parabolaCoeffs);
 	std::cout << std::endl;
-	std::cout << "Your line is: ";
+	std::cout << "Your line "<< names[1]<<" is: ";
 	printEquation(lineCoeffs);
 	std::cout << std::endl;
 
-	printIntersectionPoints(parabolaCoeffs, lineCoeffs);
+	printIntersectionPoints(parabolaCoeffs, lineCoeffs, names);
 }
 
 void operationTangents()
@@ -577,16 +702,34 @@ void operationTangents()
 	double parabolaCoeffs[3]{};
 	double pointCoordinates[2]{};
 	
+	char names[2][MAX_LEN] = {};
+
+	std::cin.ignore();
+	while (true)
+	{
+		std::cout << "Enter the name of the parabola>> ";
+		std::cin.getline(names[0], MAX_LEN);
+
+		std::cout << "Enter the name of the point>> ";
+		std::cin.getline(names[1], MAX_LEN);
+
+		if (checkAllNames(names, 2))
+		{
+			break;
+		}
+
+		std::cin.clear();
+	}
 
 	readParabolaCoeffs(parabolaCoeffs);
-	std::cout << "Your parabola is: ";
+	std::cout << "Your parabola "<<names[0]<<" is: ";
 	printParabola(parabolaCoeffs);
 	std::cout << std::endl;
-	std::cout << "Enter a point (x;y) you want to find a tangent through >> ";
+	std::cout << "Enter the coordinates of point "<< names[1]<<" (x;y) you want to find a tangent through >> ";
 	std::cin >> pointCoordinates[0]>>pointCoordinates[1];
-	std::cout << "Your point is (" << pointCoordinates[0] <<';'<<pointCoordinates[1]<<')' << std::endl;
+	std::cout << "Your point "<<names[1]<<" is (" << pointCoordinates[0] <<';'<<pointCoordinates[1]<<')' << std::endl;
 
-	printTangents(parabolaCoeffs, pointCoordinates);
+	printTangents(parabolaCoeffs, pointCoordinates, names);
 }
 
 void operationQuadrilateral()
@@ -595,9 +738,30 @@ void operationQuadrilateral()
 	int perpendicularCounter = 0; //keeps the counter of perpendicular lines 
 	int parallelHist[4] = {-1,-1,-1,-1}; //keeps the index of the line each line is parallel to; default values -1 to prevent inconsintencies
 
+	char lineNames[4][MAX_LEN] = {};
+
+	std::cin.ignore();
+	while (true)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			std::cout << "Enter the name of line "<<i+1<<" >> ";
+			std::cin.getline(lineNames[i], MAX_LEN);
+		}
+
+		if (checkAllNames(lineNames, 4))
+		{
+			break;
+		}
+
+		std::cin.clear();
+	}
+
+	std::cout << std::endl;
+
 	for (int i = 0; i < 4; i++)
 	{
-		std::cout << "Line " << i+1 << ": ";
+		std::cout << "Line " << lineNames[i] << ": ";
 		readLineCoeffs(sides[i]);
 	}
 
@@ -729,7 +893,7 @@ double calculateDistanceBetweenParallel(double lineOne[], double lineTwo[])
 	return distance;
 }
 
-void printTangents(double parabolaCoeffs[], double pointCoordinates[])
+void printTangents(double parabolaCoeffs[], double pointCoordinates[], char names[][MAX_LEN])
 {
 	double tangentCoeffs[3]{};
 
@@ -737,7 +901,7 @@ void printTangents(double parabolaCoeffs[], double pointCoordinates[])
 
 	if (getAbs(valueofX - pointCoordinates[1]) <= epsilon) // the point lies on the parabola so we have one tangent only
 	{
-		std::cout << "Only one tangent passes through your parabola: ";
+		std::cout << "Only one tangent passes through your parabola "<<names[0]<<": ";
 		calculateTangentCoeffs(parabolaCoeffs, pointCoordinates[0], pointCoordinates[1], tangentCoeffs);
 		printEquation(tangentCoeffs);
 	}
@@ -752,7 +916,7 @@ void printTangents(double parabolaCoeffs[], double pointCoordinates[])
 		
 		if (quadraticEquation(newCoeffs, helpPoints))
 		{
-				std::cout << "Two tangents pass through your parabola: "<<std::endl;
+				std::cout << "Two tangents pass through your parabola "<<names[0]<<": "<<std::endl;
 				valueY = valueOfParabola(parabolaCoeffs, helpPoints[0]);
 				calculateTangentCoeffs(parabolaCoeffs, helpPoints[0], valueY, tangentCoeffs);
 				printEquation(tangentCoeffs);
@@ -763,7 +927,7 @@ void printTangents(double parabolaCoeffs[], double pointCoordinates[])
 		}
 		else
 		{
-			std::cout << "No tangents passing through this point!" << std::endl;
+			std::cout << "No tangents passing through point "<<names[1]<<"!!!" << std::endl;
 		}
 	}
 }
@@ -776,11 +940,11 @@ void calculateTangentCoeffs(double parabolaCoeffs[], double& pointX, double& poi
 	tangentCoeffs[2] = -2 * parabolaCoeffs[0] * pointX*pointX - parabolaCoeffs[1] * pointX + pointY;
 }
 
-void printIntersectionPoints(double parabolaCoeffs[], double lineCoeffs[])
+void printIntersectionPoints(double parabolaCoeffs[], double lineCoeffs[], char names[][MAX_LEN])
 {
 	if (lineCoeffs[1] == 0) // ax+c=0
 	{
-		std::cout << "Your parabola and line intersect in: ";
+		std::cout << "Your parabola "<< names[0]<<" and line "<<names[1]<<" intersect in : ";
 		double xValue = -lineCoeffs[2] / lineCoeffs[0];
 		double value = valueOfParabola(parabolaCoeffs, xValue);
 		std::cout << '(' << -lineCoeffs[2] / lineCoeffs[0] << " ; " << value << ')';
@@ -791,7 +955,7 @@ void printIntersectionPoints(double parabolaCoeffs[], double lineCoeffs[])
 	double newCoeffs[3]{}; //| ax^2+bx+c=y
 	double roots[2]{};	   //| mx+ny+p=0 we express y from the line and plug it into the parabola to calculte the x's both intersect in
 
-	newCoeffs[0] = parabolaCoeffs[0] * lineCoeffs[1];
+	newCoeffs[0] = parabolaCoeffs[0] * lineCoeffs[1]; //coeffs of the equation we get after some basic math simplifications
 	newCoeffs[1] = parabolaCoeffs[1] * lineCoeffs[1] + lineCoeffs[0];
 	newCoeffs[2] = parabolaCoeffs[2] * lineCoeffs[1] + lineCoeffs[2];
 
@@ -799,6 +963,7 @@ void printIntersectionPoints(double parabolaCoeffs[], double lineCoeffs[])
 	{
 		if (roots[0] == roots[1]) // when D=0 we have a double root
 		{
+			std::cout << "Your parabola " << names[0] << " and line " << names[1] << " intersect in one point only: ";
 			double value = valueOfLinFunc(lineCoeffs, roots[0]);
 			std::cout << '(' << roots[0] << " ; " << value << ')';
 			std::cout << std::endl;
@@ -807,7 +972,7 @@ void printIntersectionPoints(double parabolaCoeffs[], double lineCoeffs[])
 		{
 			double value1 = valueOfLinFunc(lineCoeffs, roots[0]);
 			double value2 = valueOfLinFunc(lineCoeffs, roots[1]);
-			std::cout << "Two intersection points: ";
+			std::cout << "Your parabola " << names[0] << " and line " << names[1] << " intersect in two points: ";
 			std::cout << '(' << roots[0] << " ; " << value1 << ')';
 			std::cout << " (" << roots[1] << " ; " << value2 << ')';
 			std::cout << std::endl;
@@ -821,7 +986,7 @@ void printIntersectionPoints(double parabolaCoeffs[], double lineCoeffs[])
 
 void triangleMessage(char& optionTriangle)
 {
-	std::cout << "Choose an operation you want to execute with your triangle:"<< std::endl << std::endl;
+	std::cout << "Choose an operation you want to execute with your triangle: "<< std::endl << std::endl;
 	std::cout << "	a. find equations of the altitudes" << std::endl;
 	std::cout << "	b. find equations of the medians" << std::endl;
 	std::cout << "	c. find equations of the symetrals" << std::endl;
@@ -952,7 +1117,7 @@ void readLineCoordinates(double lineCoeff[], const int count, char names[][MAX_L
 	{
 		for (int i = 0; i < count; i++)
 		{
-			std::cout << "Coordinates of point " << names[i]<< " = ";
+			std::cout << "Coordinates of point " << names[i]<< "(x;y) = ";
 
 			for (int j = 0; j < 2; j++)
 			{
@@ -1033,11 +1198,11 @@ bool checkAllNames(char str[][MAX_LEN], const int size)
 			return false;
 		}
 
-		for (int j = i + 1; j < size; j++)
+		for (int j = i + 1; j < size; j++) //checks if names are unique
 		{
-			if (strLen(str[i]) == strLen(str[j]))
+			if (strLen(str[i]) == strLen(str[j])) //we may have a problem if names have the same length
 			{
-				if (compareSymbolBySymbol(str[i], str[j], strLen(str[i])))
+				if (compareSymbolBySymbol(str[i], str[j], strLen(str[i]))) // in this case comapre symbol by symbol
 				{
 					std::cout<<"You have enteted the same name more than once! Please enter unique names only!"<<std::endl;
 					return false;
