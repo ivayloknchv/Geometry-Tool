@@ -436,7 +436,7 @@ void welcomeMessage()
 	std::cout << "3. Determine the equation of the line that passes through a point and is parallel to another line" << std::endl;
 	std::cout << "4. Determine the equation of the line that is perpendicular to another line and passes through a point that lies on the given line" << std::endl;
 	std::cout << "5. Find the intersection point of two lines, if it exists" << std::endl;
-	std::cout << "6. Determine the equations of all altitudes, medians, symetrals are and perimeter of a triangle defined by the coordinates of its vertices" << std::endl;
+	std::cout << "6. Determine the equations of all altitudes, medians, symetrals, area and perimeter of a triangle defined by the coordinates of its vertices" << std::endl;
 	std::cout << "7. Find the tangent of a parabolyc equation through a point" << std::endl;
 	std::cout << "8. Determine the intersection point of a line and a parabola" << std::endl;
 	std::cout << "9. Determime if four lines form a quadrilateral and its type. If they don't, show an appropriate message" << std::endl << std::endl;
