@@ -6,7 +6,7 @@ This is a project I made for my Introduction to Programming Practicum Course at 
 4. Determine the equation of the line that is perpendicular to another line and passes through a point that lies on the given line
 5. Find the intersection point of two lines, if it exists
 6. Determine the equations of all altitudes, medians, symetrals are and perimeter of a triangle defined by the coordinates of its vertices
-7. Find the tangent of a parabolyc equation through a point
+7. Find the tangent of a parabolyc equation (ax^2+bx+c=y) through a point
 8. Determine the intersection point of a line and a parabola
 9. Determime if four lines form a quadrilateral and its type. If they don't, show an appropriate message
 
