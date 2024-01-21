@@ -10,4 +10,4 @@ This is a project I made for my Introduction to Programming Practicum Course at 
 8. Determine the intersection point of a line and a parabola
 9. Determime if four lines form a quadrilateral and its type. If they don't, show an appropriate message
 
-You can also name your lines and points with Latin alphabet, digits and '_'. Max 10 symbols for every name!
+You can also name your lines and points with Latin alphabet letters, digits and '_'. Max 10 symbols for every name!
