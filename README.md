@@ -1,4 +1,4 @@
-This is a project I made for my Introduction to Programming Practicum Course at FMI, Sofia Univeristy. This interactive Geometry Tool can hel you solve the following Analytic geometry problems:
+This is a project I made for my Introduction to Programming Practicum Course at FMI, Sofia Univeristy. This interactive Geometry Tool can help you solve the following Analytic geometry problems:
 
 1. Determine the equation of a line using its coefficents or two points and their coordinates
 2. Check if a point lies on a certain line
