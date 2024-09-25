@@ -39,7 +39,7 @@ void simplify(double[]);
 bool pointLies(double[], double[]);
 void parallelLine(double[], double[], double[]);
 void perpendicularLine(double[], double[], double[]);
-double getAbs(const double);
+double getAbs(double);
 void intersectionPoint(double[], double[], double[], char[][MAX_LEN]);
 void getMidPoint(double[], double[], double[]);
 void printAltitudes(double[][2], double[][3]);
@@ -119,7 +119,7 @@ int main()
 	return 0;
 }
 
-double getAbs(const double num)
+double getAbs(double num)
 {
 	return (num >= 0) ? num : -num;
 }
