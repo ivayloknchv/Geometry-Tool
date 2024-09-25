@@ -1,6 +1,3 @@
-#include <iostream>
-#include <cmath>
-
 /**
 *
 * Solution to course project # 8
@@ -15,6 +12,9 @@
 * 
 *
 */
+
+#include <iostream>
+#include <cmath>
 
 const double epsilon = 0.000001;
 const int MAX_LEN = 11; //max length of every name is 10 symbols (+1 for terminating 0)
